@@ -1,0 +1,22 @@
+name: Reusable build example
+
+on:
+  workflow_call:
+    inputs:
+      name:
+        required: true
+        type: string
+      jobName:
+        required: true
+        type: string
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "This step runs in the default shell. Hello ${{ inputs.name }}!"
+      - run: echo "This step runs in bash"
+        shell: bash
+      - run: Write-Host "This step runs in PowerShell Core. Hello ${{ inputs.name }}!"
+        shell: pwsh
+      - run: Write-Host "This step runs in PowerShell. You work in the ${{ inputs.jobName }} job. Hello ${{ inputs.name }}!"
+        shell: powershell
