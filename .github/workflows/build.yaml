@@ -1,22 +1,31 @@
-name: Reusable build example
+name: Deploy
 
 on:
+  workflow_dispatch:
   workflow_call:
     inputs:
-      name:
+      bicepTemplatePath:
+        description: 'The path to the top-level bicep template, e.g. main.bicep'
+        default: env/main.bicep
+        type: string
+      additionalBicepParameters:
+        default: ''
+        type: string
+      clientAffix:
         required: true
         type: string
-      jobName:
-        required: true
+      env:
+        default: Dv
         type: string
+
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - run: echo "This step runs in the default shell. Hello ${{ inputs.name }}!"
-      - run: echo "This step runs in bash"
+      - run: echo "This is the default bicep template path -> ${{ inputs.bicepTemplatePath }}"
+      - run: echo "These are additional bicep parameters -> ${{ inputs.additionalBicepParameters }}"
         shell: bash
-      - run: Write-Host "This step runs in PowerShell Core. Hello ${{ inputs.name }}!"
+      - run: Write-Host "This is the client affix -> ${{ inputs.clientAffix }}"
         shell: pwsh
-      - run: Write-Host "This step runs in PowerShell. You work in the ${{ inputs.jobName }} job. Hello ${{ inputs.name }}!"
-        shell: powershell
+      - run: Write-Host "This is the env -> ${{ inputs.env }}"
+        shell: pwsh
