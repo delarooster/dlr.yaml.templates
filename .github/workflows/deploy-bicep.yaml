@@ -31,7 +31,7 @@ on:
         default: 'ubuntu-latest'
 
 jobs:
-  build:
+  deploy:
     runs-on: ${{ inputs.vmImage }}
     defaults:
       run:
@@ -61,7 +61,7 @@ jobs:
           template: ${{ inputs.bicepTemplatePath }}
           failOnStdErr: false
           additionalArguments: |
-            clientAffix=${{ steps.yaml-data.outputs['clientAffix'] }} `
-            projectAffix=${{ steps.yaml-data.outputs['projectAffix'] }} `
-            env=${{ steps.yaml-data.outputs['env'] }} `
+            clientAffix=${{ steps.yaml-data.outputs['clientAffix'] }} \
+            projectAffix=${{ steps.yaml-data.outputs['projectAffix'] }} \
+            env=${{ steps.yaml-data.outputs['env'] }} \
             ${{ inputs.additionalBicepParameters }}
