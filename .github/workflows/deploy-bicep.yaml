@@ -50,7 +50,7 @@ jobs:
         uses: jbutcher5/read-yaml@main
         with:
           file: ${{ inputs.variablesYamlPath }}
-          key-path: '["runs", "using"]'
+          key-path: '["clientAffix", "projectAffix", "env"]'
       - run: |
           az account show
           az group create --name ${{ inputs.resourceGroup }} --location ${{ inputs.resourceGroupLocation }}
@@ -63,6 +63,6 @@ jobs:
           failOnStdErr: false
           parameters: >
             clientAffix=${{ steps.yaml-data.outputs.clientAffix }}
-            env=${{ steps.yaml-data.outputs.env }}
             projectAffix=${{ steps.yaml-data.outputs.projectAffix }}
+            env=${{ steps.yaml-data.outputs.env }}
             ${{ inputs.additionalBicepParameters }}
