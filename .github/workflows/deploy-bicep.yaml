@@ -25,7 +25,7 @@ on:
         default: 'eastus'
       variablesYamlPath:
         type: string
-        default: ./pipelines/variables.yaml
+        default: './pipelines/variables.yaml'
       vmImage:
         type: string
         default: 'ubuntu-latest'
@@ -50,7 +50,7 @@ jobs:
         uses: jbutcher5/read-yaml@main
         with:
           file: ${{ inputs.variablesYamlPath }}
-          key-path: '["clientAffix", "projectAffix", "env"]'
+          key-path: '["variables"]'
       - run: |
           az account show
           az group create --name ${{ inputs.resourceGroup }} --location ${{ inputs.resourceGroupLocation }}
