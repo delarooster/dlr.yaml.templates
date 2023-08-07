@@ -65,7 +65,7 @@ jobs:
             --name azuredeploy-${{ steps.current-time.outputs.time }} `
             --template-file ${{ inputs.bicepTemplatePath }} `
             --parameters `
-              clientAffix=${{ steps.yaml-data.outputs['clientAffix'] }} `
-              projectAffix=${{ steps.yaml-data.outputs['projectAffix'] }} `
-              env=${{ steps.yaml-data.outputs['env'] }} `
+              clientAffix="${{ steps.yaml-data.outputs['clientAffix'] }}" `
+              projectAffix="${{ steps.yaml-data.outputs['projectAffix'] }}" `
+              env="${{ steps.yaml-data.outputs['env'] }}" `
               ${{ inputs.additionalBicepParameters }}
