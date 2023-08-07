@@ -25,7 +25,7 @@ on:
         default: 'eastus'
       variablesYamlPath:
         type: string
-        default: './pipelines/variables.yaml'
+        default: '${{ github.workspace }}/pipelines/variables.yaml'
       vmImage:
         type: string
         default: 'ubuntu-latest'
@@ -45,24 +45,23 @@ jobs:
         with:
           # Credentials inherited from parent workflow
           creds: ${{ secrets.AZURE_CREDENTIALS }}
-      - name: Run read-yaml action
+      - name: Read YAML variables
+        uses: pietrobolcato/action-read-yaml@1.0.0
         id: yaml-data
-        uses: jbutcher5/read-yaml@main
         with:
-          file: ${{ inputs.variablesYamlPath }}
-          key-path: '["variables"]'
+          config: ${{ inputs.variablesYamlPath }}
       - run: |
           az account show
           az group create --name ${{ inputs.resourceGroup }} --location ${{ inputs.resourceGroupLocation }}
       - name: Deploy Bicep Template
         uses: azure/arm-deploy@v1
         with:
-          subscriptionId: ${{ secrets.AZURE_SUBSCRIPTION }}
-          resourceGroupName: ${{ secrets.AZURE_RG }}
+          subscriptionId: ${{ steps.yaml-data.outputs['subscriptionId'] }}
+          resourceGroupName: ${{ inputs.resourceGroup }}
           template: ${{ inputs.bicepTemplatePath }}
           failOnStdErr: false
           parameters: >
-            clientAffix=${{ steps.yaml-data.outputs.clientAffix }}
-            projectAffix=${{ steps.yaml-data.outputs.projectAffix }}
-            env=${{ steps.yaml-data.outputs.env }}
+            clientAffix=${{ steps.yaml-data.outputs['clientAffix'] }}
+            projectAffix=${{ steps.yaml-data.outputs['projectAffix'] }}
+            env=${{ steps.yaml-data.outputs['env'] }}
             ${{ inputs.additionalBicepParameters }}
