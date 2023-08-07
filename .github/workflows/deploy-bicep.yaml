@@ -23,6 +23,9 @@ on:
       resourceGroupLocation:
         type: string
         default: 'eastus'
+      variablesYamlPath:
+        type: string
+        default: ./pipelines/variables.yaml
       vmImage:
         type: string
         default: 'ubuntu-latest'
@@ -30,16 +33,36 @@ on:
 jobs:
   build:
     runs-on: ${{ inputs.vmImage }}
+    defaults:
+      run:
+        shell: pwsh
     steps:
+      # Checkout the repo
       - uses: actions/checkout@v2
+      # Login to Azure
       - name: Azure Login
         uses: azure/login@v1
         with:
+          # Credentials inherited from parent workflow
           creds: ${{ secrets.AZURE_CREDENTIALS }}
-      - run: echo "This is the default bicep template path -> ${{ inputs.bicepTemplatePath }}"
-      - run: echo "These are additional bicep parameters -> ${{ inputs.additionalBicepParameters }}"
-        shell: bash
-      - run: Write-Host "This is the client affix -> ${{ inputs.clientAffix }}"
-        shell: pwsh
-      - run: Write-Host "This is the env -> ${{ inputs.env }}"
-        shell: pwsh
+      - name: Run read-yaml action
+        id: yaml-data
+        uses: jbutcher5/read-yaml@main
+        with:
+          file: ${{ inputs.variablesYamlPath }}
+          key-path: '["runs", "using"]'
+      - run: |
+          az account show
+          az group create --name ${{ inputs.resourceGroup }} --location ${{ inputs.resourceGroupLocation }}
+      - name: Deploy Bicep Template
+        uses: azure/arm-deploy@v1
+        with:
+          subscriptionId: ${{ secrets.AZURE_SUBSCRIPTION }}
+          resourceGroupName: ${{ secrets.AZURE_RG }}
+          template: ${{ inputs.bicepTemplatePath }}
+          failOnStdErr: false
+          parameters: >
+            clientAffix=${{ steps.yaml-data.outputs.clientAffix }}
+            env=${{ steps.yaml-data.outputs.env }}
+            projectAffix=${{ steps.yaml-data.outputs.projectAffix }}
+            ${{ inputs.additionalBicepParameters }}
