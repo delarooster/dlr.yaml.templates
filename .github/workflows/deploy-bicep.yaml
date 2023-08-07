@@ -25,7 +25,7 @@ on:
         default: 'eastus'
       variablesYamlPath:
         type: string
-        default: '${{ github.workspace }}/pipelines/variables.yaml'
+        default: './pipelines/variables.yaml'
       vmImage:
         type: string
         default: 'ubuntu-latest'
