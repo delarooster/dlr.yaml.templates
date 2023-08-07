@@ -60,7 +60,7 @@ jobs:
           resourceGroupName: ${{ inputs.resourceGroup }}
           template: ${{ inputs.bicepTemplatePath }}
           failOnStdErr: false
-          parameters: >
+          additionalArguments: >
             clientAffix=${{ steps.yaml-data.outputs['clientAffix'] }}
             projectAffix=${{ steps.yaml-data.outputs['projectAffix'] }}
             env=${{ steps.yaml-data.outputs['env'] }}
