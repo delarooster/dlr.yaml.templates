@@ -35,9 +35,7 @@ jobs:
       - name: Azure Login
         uses: azure/login@v1
         with:
-          client-id: ${{ vars.SERVICEPRINCIPALID }}
-          tenant-id: ${{ vars.TENANTID }}
-          client-secret: ${{ secrets.SERVICEPRINCIPALSECRET }}
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
       - run: echo "This is the default bicep template path -> ${{ inputs.bicepTemplatePath }}"
       - run: echo "These are additional bicep parameters -> ${{ inputs.additionalBicepParameters }}"
         shell: bash
