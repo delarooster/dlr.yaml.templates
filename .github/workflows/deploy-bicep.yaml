@@ -17,11 +17,27 @@ on:
       env:
         default: Dv
         type: string
+      resourceGroup:
+        type: string
+        required: true
+      resourceGroupLocation:
+        type: string
+        default: 'eastus'
+      vmImage:
+        type: string
+        default: 'ubuntu-latest'
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ${{ inputs.vmImage }}
     steps:
+      - uses: actions/checkout@v2
+      - name: Azure Login
+        uses: azure/login@v1
+        with:
+          client-id: ${{ vars.SERVICEPRINCIPALID }}
+          tenant-id: ${{ vars.TENANTID }}
+          client-secret: ${{ secrets.SERVICEPRINCIPALSECRET }}
       - run: echo "This is the default bicep template path -> ${{ inputs.bicepTemplatePath }}"
       - run: echo "These are additional bicep parameters -> ${{ inputs.additionalBicepParameters }}"
         shell: bash
