@@ -76,9 +76,10 @@ jobs:
           
       - run: |
           Write-Host "Deployment Outputs:"
-          $outputs = ${{ steps.bicep-deploy.outputs }}
-          Write-Host "Number of outputs: " $outputs.Count
-          foreach ($output in $outputs) {
-            Write-Host $output
+          $outputs = "${{ toJson(steps.bicep-deploy.outputs) }}"
+          $outputsObj = $outputs | ConvertFrom-Json
+          Write-Host "Number of outputs: " ($outputsObj.PSObject.Properties.Name).Count
+          foreach ($output in $outputsObj.PSObject.Properties) {
+            Write-Host $output.Name ": " $output.Value
           }
         name: 'Show Deployment Outputs'
