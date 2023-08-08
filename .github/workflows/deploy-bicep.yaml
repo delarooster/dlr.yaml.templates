@@ -74,6 +74,6 @@ jobs:
             env=${{ steps.yaml-data.outputs['env'] }} ${{ inputs.additionalBicepParameters }}
           
       - run: |
-          echo "Deployment Outputs:"
-          echo "${{ steps.bicep-deploy.outputs.outputs }}"
+          Write-Host "Deployment Outputs:"
+          Write-Host "${{ steps.bicep-deploy.outputs }}"
         name: 'Show Deployment Outputs'
