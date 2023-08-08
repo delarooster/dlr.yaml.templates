@@ -58,22 +58,16 @@ jobs:
         id: current-time
         with:
           format: YYYYMMDD-HH
-      # - run: |
-      #     az --version
-      #     az deployment group create `
-      #       --resource-group ${{ inputs.resourceGroup }} `
-      #       --name azuredeploy-${{ steps.current-time.outputs.time }} `
-      #       --template-file ${{ inputs.bicepTemplatePath }} `
-      #       --parameters `
-      #         clientAffix="${{ steps.yaml-data.outputs['clientAffix'] }}" `
-      #         projectAffix="${{ steps.yaml-data.outputs['projectAffix'] }}" `
-      #         env="${{ steps.yaml-data.outputs['env'] }}" `
-      #         ${{ inputs.additionalBicepParameters }}
+
       - name: Deploy Bicep Template
         uses: azure/arm-deploy@v1
+        id: deploy
         with:
           subscriptionId: ${{ steps.yaml-data.outputs['subscriptionId'] }}
           resourceGroupName: ${{ inputs.resourceGroup }}
           template: ${{ inputs.bicepTemplatePath }}
           failOnStdErr: false
-          parameters: clientAffix=${{ steps.yaml-data.outputs['clientAffix'] }} projectAffix=${{ steps.yaml-data.outputs['projectAffix'] }} env=${{ steps.yaml-data.outputs['env'] }} ${{ inputs.additionalBicepParameters }}
+          parameters: >
+            clientAffix=${{ steps.yaml-data.outputs['clientAffix'] }}
+            projectAffix=${{ steps.yaml-data.outputs['projectAffix'] }}
+            env=${{ steps.yaml-data.outputs['env'] }} ${{ inputs.additionalBicepParameters }}
