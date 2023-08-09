@@ -45,7 +45,7 @@ jobs:
         with:
           # Credentials inherited from parent workflow
           creds: ${{ secrets.AZURE_CREDENTIALS }}
-          
+
       - name: Read YAML variables
         uses: pietrobolcato/action-read-yaml@1.0.0
         id: yaml-data
@@ -80,7 +80,7 @@ jobs:
       - name: Deploy Bicep Template
         id: bicep-deploy
         run: |
-          $currentTime = ${{ steps.current-time.outputs.time }}.Replace(":", "-")
+          $currentTime = "${{ steps.current-time.outputs.time }}".Replace(":", "-")
           Write-Host "CURRENT_TIME=$currentTime" >> "$GITHUB_OUTPUT"
 
           az --version
