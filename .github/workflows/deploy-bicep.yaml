@@ -74,12 +74,13 @@ jobs:
             env=${{ steps.yaml-data.outputs['env'] }}
             ${{ inputs.additionalBicepParameters }}
           
-      - run: |
-          Write-Host "Deployment Outputs:"
-          $outputs = "${{ toJson(steps.bicep-deploy.outputs) }}"
+      - name: 'Show Deployment Outputs'
+        run: |
+          $outputs = '${{ toJson(steps.bicep-deploy.outputs) }}' -replace '"','\"'
           $outputsObj = $outputs | ConvertFrom-Json
+          Write-Host "Deployment Outputs:"
           Write-Host "Number of outputs: " ($outputsObj.PSObject.Properties.Name).Count
           foreach ($output in $outputsObj.PSObject.Properties) {
-            Write-Host $output.Name ": " $output.Value
+            Write-Host "$($output.Name): $($output.Value)"
           }
-        name: 'Show Deployment Outputs'
+        shell: pwsh
