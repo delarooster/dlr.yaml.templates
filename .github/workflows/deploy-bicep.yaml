@@ -59,28 +59,59 @@ jobs:
         with:
           format: YYYYMMDD-HH
 
+      # - name: Deploy Bicep Template
+      #   uses: azure/arm-deploy@v1
+      #   id: bicep-deploy
+      #   with:
+      #     subscriptionId: ${{ steps.yaml-data.outputs['subscriptionId'] }}
+      #     scope: resourcegroup
+      #     resourceGroupName: ${{ inputs.resourceGroup }}
+      #     template: ${{ inputs.bicepTemplatePath }}
+      #     failOnStdErr: false
+      #     parameters: >
+      #       clientAffix=${{ steps.yaml-data.outputs['clientAffix'] }}
+      #       projectAffix=${{ steps.yaml-data.outputs['projectAffix'] }}
+      #       env=${{ steps.yaml-data.outputs['env'] }}
+      #       ${{ inputs.additionalBicepParameters }}
+
       - name: Deploy Bicep Template
-        uses: azure/arm-deploy@v1
         id: bicep-deploy
-        with:
-          subscriptionId: ${{ steps.yaml-data.outputs['subscriptionId'] }}
-          scope: resourcegroup
-          resourceGroupName: ${{ inputs.resourceGroup }}
-          template: ${{ inputs.bicepTemplatePath }}
-          failOnStdErr: false
-          parameters: >
-            clientAffix=${{ steps.yaml-data.outputs['clientAffix'] }}
-            projectAffix=${{ steps.yaml-data.outputs['projectAffix'] }}
-            env=${{ steps.yaml-data.outputs['env'] }}
-            ${{ inputs.additionalBicepParameters }}
-          
-      - name: 'Show Deployment Outputs'
         run: |
-          $outputs = '${{ toJson(steps.bicep-deploy.outputs) }}' -replace '"','\"'
-          $outputsObj = $outputs | ConvertFrom-Json
-          Write-Host "Deployment Outputs:"
-          Write-Host "Number of outputs: " ($outputsObj.PSObject.Properties.Name).Count
-          foreach ($output in $outputsObj.PSObject.Properties) {
-            Write-Host "$($output.Name): $($output.Value)"
+          az --version
+          az deployment group create `
+            --resource-group ${{ inputs.resourceGroup }} `
+            --name azuredeploy-${{ steps.current-time.outputs.time }} `
+            --template-file ${{ inputs.bicepTemplatePath }} `
+            --parameters `
+              clientAffix=${{ steps.yaml-data.outputs['clientAffix'] }} `
+              env=${{ steps.yaml-data.outputs['env'] }} `
+              projectAffix=${{ steps.yaml-data.outputs['projectAffix'] }} `
+              ${{ inputs.additionalBicepParameters }}
+          
+      # - name: 'Capture Bicep Outputs'
+      #   run: |
+      #     $outputs = '${{ toJson(steps.bicep-deploy.outputs) }}' -replace '"','\"'
+      #     $outputsObj = $outputs | ConvertFrom-Json
+      #     Write-Host "Deployment Outputs:"
+      #     Write-Host "Number of outputs: " ($outputsObj.PSObject.Properties.Name).Count
+      #     foreach ($output in $outputsObj.PSObject.Properties) {
+      #       Write-Host "$($output.Name): $($output.Value)"
+      #     }
+      #   shell: pwsh
+      
+      - name: 'Capture Bicep Outputs'
+        run: |
+          $out = az deployment group show -g ${{ inputs.resourceGroup }} -n azuredeploy-${{ steps.current-time.outputs.time }} | convertfrom-json | foreach properties | foreach outputs
+          if($out -ne $null)
+          {
+              $provisionOutputs = [PSCustomObject]@{}
+              $out | Get-Member -MemberType NoteProperty | ForEach-Object {
+              $name = $_.name
+              $provisionOutputs | Add-Member -MemberType NoteProperty -Name $name -value $out.$name.value
+              Write-Host "BICEP output key/value -> $($name): $($out.$name.value)"
+              Write-Host "$($name)=$($out.$name.value)" >> "$GITHUB_OUTPUT"
+              }
           }
-        shell: pwsh
+          else {
+              Write-Host "BICEP outputs are null"
+          }
