@@ -53,8 +53,7 @@ jobs:
       - run: |
           az account show
           az group create --name ${{ inputs.resourceGroup }} --location ${{ inputs.resourceGroupLocation }}
-      - name: Get current time
-        uses: josStorer/get-current-time@v2
+      - name: Get current time        uses: josStorer/get-current-time@v2
         id: current-time
         with:
           format: YYYYMMDD-HH
@@ -77,10 +76,13 @@ jobs:
       - name: Deploy Bicep Template
         id: bicep-deploy
         run: |
+          $currentTime = ${{ steps.current-time.outputs.time }}.Replace(":", "-")
+          Write-Host "CURRENT_TIME=$currentTime" >> "$GITHUB_OUTPUT"
+
           az --version
           az deployment group create `
             --resource-group ${{ inputs.resourceGroup }} `
-            --name azuredeploy-${{ steps.current-time.outputs.time }} `
+            --name azuredeploy-$($currentTime) `
             --template-file ${{ inputs.bicepTemplatePath }} `
             --parameters `
               clientAffix=${{ steps.yaml-data.outputs['clientAffix'] }} `
@@ -101,7 +103,8 @@ jobs:
       
       - name: 'Capture Bicep Outputs'
         run: |
-          $out = az deployment group show -g ${{ inputs.resourceGroup }} -n azuredeploy-${{ steps.current-time.outputs.time }} | convertfrom-json | foreach properties | foreach outputs
+          $currentTime = ${{ steps.current-time.outputs.time }}
+          $out = az deployment group show -g ${{ inputs.resourceGroup }} -n azuredeploy-${{ steps.bicep-deploy.outputs.CURRENT_TIME }} | convertfrom-json | foreach properties | foreach outputs
           if($out -ne $null)
           {
               $provisionOutputs = [PSCustomObject]@{}
