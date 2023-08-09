@@ -81,7 +81,7 @@ jobs:
         id: bicep-deploy
         run: |
           $currentTime = "${{ steps.current-time.outputs.time }}".Replace(":", "-")
-          Write-Host "CURRENT_TIME=$currentTime" >> "$GITHUB_OUTPUT"
+          echo "CURRENT_TIME=$currentTime" >> "$GITHUB_OUTPUT"
 
           az --version
           az deployment group create `
