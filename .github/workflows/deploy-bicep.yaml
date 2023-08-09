@@ -45,15 +45,19 @@ jobs:
         with:
           # Credentials inherited from parent workflow
           creds: ${{ secrets.AZURE_CREDENTIALS }}
+          
       - name: Read YAML variables
         uses: pietrobolcato/action-read-yaml@1.0.0
         id: yaml-data
         with:
           config: ${{ inputs.variablesYamlPath }}
+
       - run: |
           az account show
           az group create --name ${{ inputs.resourceGroup }} --location ${{ inputs.resourceGroupLocation }}
-      - name: Get current time        uses: josStorer/get-current-time@v2
+
+      - name: Get current time
+        uses: josStorer/get-current-time@v2
         id: current-time
         with:
           format: YYYYMMDD-HH
