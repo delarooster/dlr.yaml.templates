@@ -77,11 +77,15 @@ jobs:
       #       env=${{ steps.yaml-data.outputs['env'] }}
       #       ${{ inputs.additionalBicepParameters }}
 
+      - run: |
+          $inputValue = ${{ steps.current-time.outputs.time }}.Replace(":", "-")
+          $keyValuePair = "currentTime=$inputValue"
+          Set-Content -Path .env -Value $keyValuePair
+
       - name: Deploy Bicep Template
         id: bicep-deploy
         run: |
-          $currentTime = "${{ steps.current-time.outputs.time }}".Replace(":", "-")
-          echo "CURRENT_TIME=$currentTime" >> "$GITHUB_OUTPUT"
+          $currentTime = (Get-Content -Path .env).Split("=")[1]
 
           az --version
           az deployment group create `
@@ -107,7 +111,7 @@ jobs:
       
       - name: 'Capture Bicep Outputs'
         run: |
-          $currentTime = "${{ steps.bicep-deploy.outputs.CURRENT_TIME }}"
+          $currentTime = (Get-Content -Path .env).Split("=")[1]
           Write-Host "Current time: $currentTime"
           $out = az deployment group show -g ${{ inputs.resourceGroup }} -n "azuredeploy-$($currentTime)" | convertfrom-json | foreach properties | foreach outputs
           if($out -ne $null)
