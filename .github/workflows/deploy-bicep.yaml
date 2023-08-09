@@ -78,7 +78,7 @@ jobs:
       #       ${{ inputs.additionalBicepParameters }}
 
       - run: |
-          $inputValue = ${{ steps.current-time.outputs.time }}.Replace(":", "-")
+          $inputValue = "${{ steps.current-time.outputs.time }}".Replace(":", "-")
           $keyValuePair = "currentTime=$inputValue"
           Set-Content -Path .env -Value $keyValuePair
 
