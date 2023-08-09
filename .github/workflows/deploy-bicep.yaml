@@ -108,7 +108,7 @@ jobs:
       - name: 'Capture Bicep Outputs'
         run: |
           $currentTime = ${{ steps.current-time.outputs.time }}
-          $out = az deployment group show -g ${{ inputs.resourceGroup }} -n azuredeploy-${{ steps.bicep-deploy.outputs.CURRENT_TIME }} | convertfrom-json | foreach properties | foreach outputs
+          $out = az deployment group show -g ${{ inputs.resourceGroup }} -n "azuredeploy-${{ steps.bicep-deploy.outputs.CURRENT_TIME }}" | convertfrom-json | foreach properties | foreach outputs
           if($out -ne $null)
           {
               $provisionOutputs = [PSCustomObject]@{}
