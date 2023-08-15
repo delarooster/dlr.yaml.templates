@@ -31,7 +31,7 @@ on:
         default: 'ubuntu-latest'
 
 jobs:
-  deploy:
+  deploy-bicep:
     runs-on: ${{ inputs.vmImage }}
     defaults:
       run:
@@ -62,21 +62,6 @@ jobs:
         with:
           format: YYYYMMDD-HH
 
-      # - name: Deploy Bicep Template
-      #   uses: azure/arm-deploy@v1
-      #   id: bicep-deploy
-      #   with:
-      #     subscriptionId: ${{ steps.yaml-data.outputs['subscriptionId'] }}
-      #     scope: resourcegroup
-      #     resourceGroupName: ${{ inputs.resourceGroup }}
-      #     template: ${{ inputs.bicepTemplatePath }}
-      #     failOnStdErr: false
-      #     parameters: >
-      #       clientAffix=${{ steps.yaml-data.outputs['clientAffix'] }}
-      #       projectAffix=${{ steps.yaml-data.outputs['projectAffix'] }}
-      #       env=${{ steps.yaml-data.outputs['env'] }}
-      #       ${{ inputs.additionalBicepParameters }}
-
       - run: |
           $inputValue = "${{ steps.current-time.outputs.time }}".Replace(":", "-")
           $keyValuePair = "currentTime=$inputValue"
@@ -97,19 +82,9 @@ jobs:
               env=${{ steps.yaml-data.outputs['env'] }} `
               projectAffix=${{ steps.yaml-data.outputs['projectAffix'] }} `
               ${{ inputs.additionalBicepParameters }}
-          
-      # - name: 'Capture Bicep Outputs'
-      #   run: |
-      #     $outputs = '${{ toJson(steps.bicep-deploy.outputs) }}' -replace '"','\"'
-      #     $outputsObj = $outputs | ConvertFrom-Json
-      #     Write-Host "Deployment Outputs:"
-      #     Write-Host "Number of outputs: " ($outputsObj.PSObject.Properties.Name).Count
-      #     foreach ($output in $outputsObj.PSObject.Properties) {
-      #       Write-Host "$($output.Name): $($output.Value)"
-      #     }
-      #   shell: pwsh
       
       - name: 'Capture Bicep Outputs'
+        id: bicep-outputs
         run: |
           $currentTime = (Get-Content -Path .env).Split("=")[1]
           Write-Host "Current time: $currentTime"
@@ -121,7 +96,7 @@ jobs:
               $name = $_.name
               $provisionOutputs | Add-Member -MemberType NoteProperty -Name $name -value $out.$name.value
               Write-Host "BICEP output key/value -> $($name): $($out.$name.value)"
-              Write-Host "$($name)=$($out.$name.value)" >> "$GITHUB_OUTPUT"
+              Write-Host "$($name)=$($out.$name.value)" >> "$env:GITHUB_OUTPUT"
               }
           }
           else {
