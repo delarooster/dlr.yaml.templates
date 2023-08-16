@@ -96,7 +96,7 @@ jobs:
               $name = $_.name
               $provisionOutputs | Add-Member -MemberType NoteProperty -Name $name -value $out.$name.value
               Write-Host "BICEP output key/value -> $($name): $($out.$name.value)"
-              Write-Host "$($name)=$($out.$name.value)" >> "$env:GITHUB_OUTPUT"
+              Write-Host "$($name)=$($out.$name.value)" >> "$env:GITHUB_ENV"
               }
           }
           else {
