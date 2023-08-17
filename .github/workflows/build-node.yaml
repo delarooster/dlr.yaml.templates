@@ -2,22 +2,37 @@
 name: build node
 
 on:
-  workflow_dispatch:
+  push:
+  workflow_dispatch: #Note to self, workflow dispatch doesn't show up until its in the default branch
   workflow_call:
     inputs:
-      test-var:
+      vmImage:
         type: string
-        default: 'test'
+        default: 'ubuntu-latest'
+      nodeVersion:
+        type: string
+        default: '16.x'
 
 
 jobs:
   build-node:
     # The type of runner that the job will run on
-    runs-on: ubuntu-latest
+    runs-on: ${{ inputs.vmImage }}
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v2
 
+      - name: Use Node.js ${{ inputs.nodeVersion }}
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ inputs.nodeVersion }}
+      
+      - name: npm install
+        run: npm ci
+      
+      - name: display artifact
+        run: ls -lsa
+      
       # Runs a single command using the runners shell
       - name: Run a one-line script
         run: echo Hello, world!
