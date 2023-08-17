@@ -22,12 +22,12 @@ jobs:
         id: defaults
         run: |
           NODEVERSION=${{ inputs.nodeVersion }}
-          echo "::set-output name=nodeVersion::${NODEVERSION:='16.x'}"
+          echo "{nodeVersion}=${NODEVERSION:='16.x'}" >> $GITHUB_OUTPUT
 
-      - name: Use Node.js ${{ steps.defaults.outcome.nodeVersion }}
+      - name: Use Node.js ${{ steps.defaults.outputs.nodeVersion }}
         uses: actions/setup-node@v3
         with:
-          node-version: ${{ steps.defaults.outcome.nodeVersion }}
+          node-version: ${{ steps.defaults.outputs.nodeVersion }}
       
       - name: npm install
         run: npm ci
