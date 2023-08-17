@@ -23,7 +23,7 @@ jobs:
         run: |
           NODEVERSION=${{ inputs.nodeVersion }}
           VALUE=${NODEVERSION:='16.x'}
-          echo "{nodeVersion}={VALUE}" >> $GITHUB_OUTPUT
+          echo "nodeVersion=${VALUE}" >> $GITHUB_OUTPUT
           echo $VALUE
           ls -lsa
 
@@ -37,6 +37,7 @@ jobs:
           echo "the nodeVersion is ${{ steps.defaults.outputs.nodeVersion }}"
           cd node-example
           npm ci
+          npm test
       
       - name: display artifact
         run: |
