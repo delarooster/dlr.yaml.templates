@@ -34,12 +34,11 @@ jobs:
       
       - name: npm install
         run: |
+          echo "the nodeVersion is ${{ steps.defaults.outputs.nodeVersion }}"
           cd node-example
-          npm install
+          npm ci
       
       - name: display artifact
-        run: ls -lsa
-      
-      # Runs a single command using the runners shell
-      - name: Run a one-line script
-        run: echo Hello, world!
+        run: |
+          cd node-example
+          ls -lsa
