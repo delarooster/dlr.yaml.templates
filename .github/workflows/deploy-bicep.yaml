@@ -104,3 +104,5 @@ jobs:
           else {
               Write-Host "BICEP outputs are null"
           }
+    outputs: 
+      acrName: ${{ steps.bicep-outputs.outputs.acrName }}
