@@ -3,13 +3,9 @@ name: build node
 
 on:
   push:
-  workflow_dispatch: #Note to self, workflow dispatch doesn't show up until its in the default branch
-  workflow_call:
+  workflow_dispatch:
     inputs:
-      vmImage:
-        type: string
-        default: ubuntu-latest
-      nodeVersion:
+      NODEVERSION:
         type: string
         default: '16.x'
 
@@ -21,6 +17,12 @@ jobs:
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v2
+
+      - name: capture default variables
+        id: defaults
+        run: |
+          NODEVERSION=${{ inputs.nodeVersion }}
+          echo "::set-output defaults=nodeVersion::${NODEVERSION:='16.x'}"
 
       - name: Use Node.js ${{ inputs.nodeVersion }}
         uses: actions/setup-node@v3
