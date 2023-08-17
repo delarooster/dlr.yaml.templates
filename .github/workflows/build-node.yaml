@@ -23,8 +23,9 @@ jobs:
         run: |
           NODEVERSION=${{ inputs.nodeVersion }}
           VALUE=${NODEVERSION:='16.x'}
-          echo "{nodeVersion}=${VALUE}" >> $GITHUB_OUTPUT
+          echo "{nodeVersion}={VALUE}" >> $GITHUB_OUTPUT
           echo $VALUE
+          ls -lsa
 
       - name: Use Node.js ${{ steps.defaults.outputs.nodeVersion }}
         uses: actions/setup-node@v3
