@@ -17,7 +17,7 @@ on:
 jobs:
   build-node:
     # The type of runner that the job will run on
-    runs-on: ${{ inputs.vmImage }}
+    runs-on: '${{ inputs.vmImage }}'
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v2
