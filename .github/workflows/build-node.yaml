@@ -2,7 +2,6 @@
 name: build node
 
 on: #[workflow_dispatch]
-  push:
   workflow_dispatch:
     inputs:
       test-var:
