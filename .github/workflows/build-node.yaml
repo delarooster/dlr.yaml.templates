@@ -1,6 +1,9 @@
 name: build-node
 
-on: [workflow_dispatch]
+on:
+  workflow_dispatch:
+
+
 jobs:
   testing-the-workflow:
     runs-on: ubuntu-latest
