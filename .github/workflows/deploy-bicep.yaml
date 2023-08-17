@@ -93,11 +93,13 @@ jobs:
           {
               $provisionOutputs = [PSCustomObject]@{}
               $out | Get-Member -MemberType NoteProperty | ForEach-Object {
-              $name = $_.name
-              $provisionOutputs | Add-Member -MemberType NoteProperty -Name $name -value $out.$name.value
-              Write-Host "BICEP output key/value -> $($name): $($out.$name.value)"
-              Write-Host "$($name)=$($out.$name.value)" >> "$env:GITHUB_ENV"
-              Add-Content -Path $env:GITHUB_ENV -Value "$($name)=$($out.$name.value)"
+                $name = $_.name
+                $provisionOutputs | Add-Member -MemberType NoteProperty -Name $name -value $out.$name.value
+                Write-Host "BICEP output key/value -> $($name): $($out.$name.value)"
+                # Write-Host "$($name)=$($out.$name.value)" >> "$env:GITHUB_ENV"
+                # Add-Content -Path $env:GITHUB_ENV -Value "$($name)=$($out.$name.value)"
+                $keyValuePair = "$($name)=$($out.$name.value)"
+                Set-Content -Path .env -Value $keyValuePair
               }
           }
           else {
