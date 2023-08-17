@@ -22,7 +22,7 @@ jobs:
         id: defaults
         run: |
           NODEVERSION=${{ inputs.nodeVersion }}
-          echo "::set-output defaults=nodeVersion::${NODEVERSION:='16.x'}"
+          echo "::set-output name=nodeVersion::${NODEVERSION:='16.x'}"
 
       - name: Use Node.js ${{ steps.defaults.outcome.nodeVersion }}
         uses: actions/setup-node@v3
