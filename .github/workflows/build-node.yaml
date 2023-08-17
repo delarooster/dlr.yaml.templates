@@ -24,10 +24,10 @@ jobs:
           NODEVERSION=${{ inputs.nodeVersion }}
           echo "::set-output defaults=nodeVersion::${NODEVERSION:='16.x'}"
 
-      - name: Use Node.js ${{ inputs.nodeVersion }}
+      - name: Use Node.js ${{ steps.defaults.outcome.nodeVersion }}
         uses: actions/setup-node@v3
         with:
-          node-version: ${{ inputs.nodeVersion }}
+          node-version: ${{ steps.defaults.outcome.nodeVersion }}
       
       - name: npm install
         run: npm ci
