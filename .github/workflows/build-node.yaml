@@ -22,7 +22,9 @@ jobs:
         id: defaults
         run: |
           NODEVERSION=${{ inputs.nodeVersion }}
-          echo "{nodeVersion}=${NODEVERSION:='16.x'}" >> $GITHUB_OUTPUT
+          VALUE=${NODEVERSION:='16.x'}
+          echo "{nodeVersion}=${VALUE}" >> $GITHUB_OUTPUT
+          echo $VALUE
 
       - name: Use Node.js ${{ steps.defaults.outputs.nodeVersion }}
         uses: actions/setup-node@v3
@@ -30,7 +32,7 @@ jobs:
           node-version: ${{ steps.defaults.outputs.nodeVersion }}
       
       - name: npm install
-        run: npm ci
+        run: npm install
       
       - name: display artifact
         run: ls -lsa
