@@ -98,7 +98,7 @@ jobs:
                 Write-Host "BICEP output key/value -> $($name): $($out.$name.value)"
                 # Write-Host "$($name)=$($out.$name.value)" >> "$env:GITHUB_ENV"
                 # Add-Content -Path $env:GITHUB_ENV -Value "$($name)=$($out.$name.value)"
-                Write-Host "$($name)=$($out.$name.value)" | Out-File -Append $env:GITHUB_ENV
+                echo "$($name)=$($out.$name.value)" | Out-File -Append $env:GITHUB_ENV
               }
           }
           else {
