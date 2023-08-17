@@ -33,7 +33,9 @@ jobs:
           node-version: ${{ steps.defaults.outputs.nodeVersion }}
       
       - name: npm install
-        run: npm install
+        run: |
+          cd node-example
+          npm install
       
       - name: display artifact
         run: ls -lsa
