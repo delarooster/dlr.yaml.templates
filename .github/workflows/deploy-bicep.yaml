@@ -56,26 +56,26 @@ jobs:
           az account show
           az group create --name ${{ inputs.resourceGroup }} --location ${{ inputs.resourceGroupLocation }}
 
-      - name: Get current time
-        uses: josStorer/get-current-time@v2
-        id: current-time
-        with:
-          format: YYYYMMDD-HH
+      # - name: Get current time
+      #   uses: josStorer/get-current-time@v2
+      #   id: current-time
+      #   with:
+      #     format: YYYYMMDD-HH
 
-      - run: |
-          $inputValue = "${{ steps.current-time.outputs.time }}".Replace(":", "-")
-          $keyValuePair = "currentTime=$inputValue"
-          Set-Content -Path .env -Value $keyValuePair
+      # - run: |
+      #     $inputValue = "${{ steps.current-time.outputs.time }}".Replace(":", "-")
+      #     $keyValuePair = "currentTime=$inputValue"
+      #     Set-Content -Path .env -Value $keyValuePair
 
       - name: Deploy Bicep Template
         id: bicep-deploy
         run: |
-          $currentTime = (Get-Content -Path .env).Split("=")[1]
+          # $currentTime = (Get-Content -Path .env).Split("=")[1]
 
           az --version
           az deployment group create `
             --resource-group ${{ inputs.resourceGroup }} `
-            --name azuredeploy-$($currentTime) `
+            --name azuredeploy-$GITHUB_RUN_ATTEMPT `
             --template-file ${{ inputs.bicepTemplatePath }} `
             --parameters `
               clientAffix=${{ steps.yaml-data.outputs['clientAffix'] }} `
@@ -86,9 +86,9 @@ jobs:
       - name: 'Capture Bicep Outputs'
         id: bicep-outputs
         run: |
-          $currentTime = (Get-Content -Path .env).Split("=")[1]
-          Write-Host "Current time: $currentTime"
-          $out = az deployment group show -g ${{ inputs.resourceGroup }} -n "azuredeploy-$($currentTime)" | convertfrom-json | foreach properties | foreach outputs
+          # $currentTime = (Get-Content -Path .env).Split("=")[1]
+          # Write-Host "Current time: $currentTime"
+          $out = az deployment group show -g ${{ inputs.resourceGroup }} -n "azuredeploy-$GITHUB_RUN_ATTEMPT" | convertfrom-json | foreach properties | foreach outputs
           if($out -ne $null)
           {
               $provisionOutputs = [PSCustomObject]@{}
@@ -104,5 +104,8 @@ jobs:
           else {
               Write-Host "BICEP outputs are null"
           }
+      - run: |
+          echo "BICEP outputs:"
+          echo $env:GITHUB_ENV
     outputs: 
       acrName: ${{ steps.bicep-outputs.outputs.acrName }}
