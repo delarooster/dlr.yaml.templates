@@ -67,45 +67,47 @@ jobs:
       #     $keyValuePair = "currentTime=$inputValue"
       #     Set-Content -Path .env -Value $keyValuePair
 
-      - name: Deploy Bicep Template
-        id: bicep-deploy
-        run: |
-          # $currentTime = (Get-Content -Path .env).Split("=")[1]
+      # - name: Deploy Bicep Template
+      #   id: bicep-deploy
+      #   run: |
+      #     # $currentTime = (Get-Content -Path .env).Split("=")[1]
 
-          az --version
-          az deployment group create `
-            --resource-group ${{ inputs.resourceGroup }} `
-            --name azuredeploy-$GITHUB_RUN_ATTEMPT `
-            --template-file ${{ inputs.bicepTemplatePath }} `
-            --parameters `
-              clientAffix=${{ steps.yaml-data.outputs['clientAffix'] }} `
-              env=${{ steps.yaml-data.outputs['env'] }} `
-              projectAffix=${{ steps.yaml-data.outputs['projectAffix'] }} `
-              ${{ inputs.additionalBicepParameters }}
+      #     az --version
+      #     az deployment group create `
+      #       --resource-group ${{ inputs.resourceGroup }} `
+      #       --name azuredeploy-$GITHUB_RUN_ATTEMPT `
+      #       --template-file ${{ inputs.bicepTemplatePath }} `
+      #       --parameters `
+      #         clientAffix=${{ steps.yaml-data.outputs['clientAffix'] }} `
+      #         env=${{ steps.yaml-data.outputs['env'] }} `
+      #         projectAffix=${{ steps.yaml-data.outputs['projectAffix'] }} `
+      #         ${{ inputs.additionalBicepParameters }}
       
-      - name: 'Capture Bicep Outputs'
+      # - name: 'Capture Bicep Outputs'
+      #   id: bicep-outputs
+      #   run: |
+      #     # $currentTime = (Get-Content -Path .env).Split("=")[1]
+      #     # Write-Host "Current time: $currentTime"
+      #     $out = az deployment group show -g ${{ inputs.resourceGroup }} -n "azuredeploy-$GITHUB_RUN_ATTEMPT" | convertfrom-json | foreach properties | foreach outputs
+      #     if($out -ne $null)
+      #     {
+      #         $provisionOutputs = [PSCustomObject]@{}
+      #         $out | Get-Member -MemberType NoteProperty | ForEach-Object {
+      #           $name = $_.name
+      #           $provisionOutputs | Add-Member -MemberType NoteProperty -Name $name -value $out.$name.value
+      #           Write-Host "BICEP output key/value -> $($name): $($out.$name.value)"
+      #           # Write-Host "$($name)=$($out.$name.value)" >> "$env:GITHUB_ENV"
+      #           # Add-Content -Path $env:GITHUB_ENV -Value "$($name)=$($out.$name.value)"
+      #           echo "$($name)=$($out.$name.value)" | Out-File -Append $env:GITHUB_OUTPUT
+      #         }
+      #     }
+      #     else {
+      #         Write-Host "BICEP outputs are null"
+      #     }
+      - name: Hard-Coded Outputs
         id: bicep-outputs
         run: |
-          # $currentTime = (Get-Content -Path .env).Split("=")[1]
-          # Write-Host "Current time: $currentTime"
-          $out = az deployment group show -g ${{ inputs.resourceGroup }} -n "azuredeploy-$GITHUB_RUN_ATTEMPT" | convertfrom-json | foreach properties | foreach outputs
-          if($out -ne $null)
-          {
-              $provisionOutputs = [PSCustomObject]@{}
-              $out | Get-Member -MemberType NoteProperty | ForEach-Object {
-                $name = $_.name
-                $provisionOutputs | Add-Member -MemberType NoteProperty -Name $name -value $out.$name.value
-                Write-Host "BICEP output key/value -> $($name): $($out.$name.value)"
-                # Write-Host "$($name)=$($out.$name.value)" >> "$env:GITHUB_ENV"
-                # Add-Content -Path $env:GITHUB_ENV -Value "$($name)=$($out.$name.value)"
-                echo "$($name)=$($out.$name.value)" | Out-File -Append $env:GITHUB_OUTPUT
-              }
-          }
-          else {
-              Write-Host "BICEP outputs are null"
-          }
-      - run: |
-          echo "BICEP outputs:"
-          echo $env:GITHUB_OUTPUT
+          echo "Hard-coded outputs:"
+          echo "acrName=Blah123" >> $GITHUB_OUTPUT
     outputs: 
       acrName: ${{ steps.bicep-outputs.outputs.acrName }}
