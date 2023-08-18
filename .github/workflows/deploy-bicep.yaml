@@ -40,21 +40,21 @@ jobs:
       # Checkout the repo
       - uses: actions/checkout@v2
       # Login to Azure
-      - name: Azure Login
-        uses: azure/login@v1
-        with:
-          # Credentials inherited from parent workflow
-          creds: ${{ secrets.AZURE_CREDENTIALS }}
+      # - name: Azure Login
+      #   uses: azure/login@v1
+      #   with:
+      #     # Credentials inherited from parent workflow
+      #     creds: ${{ secrets.AZURE_CREDENTIALS }}
 
-      - name: Read YAML variables
-        uses: pietrobolcato/action-read-yaml@1.0.0
-        id: yaml-data
-        with:
-          config: ${{ inputs.variablesYamlPath }}
+      # - name: Read YAML variables
+      #   uses: pietrobolcato/action-read-yaml@1.0.0
+      #   id: yaml-data
+      #   with:
+      #     config: ${{ inputs.variablesYamlPath }}
 
-      - run: |
-          az account show
-          az group create --name ${{ inputs.resourceGroup }} --location ${{ inputs.resourceGroupLocation }}
+      # - run: |
+      #     az account show
+      #     az group create --name ${{ inputs.resourceGroup }} --location ${{ inputs.resourceGroupLocation }}
 
       # - name: Get current time
       #   uses: josStorer/get-current-time@v2
@@ -107,10 +107,8 @@ jobs:
       - name: Hard-Coded Outputs
         id: bicep-outputs
         run: |
-          echo "Hard-coded outputs:"
-          echo "acrName=Blah123" >> $GITHUB_OUTPUT
-          echo "acrName=Blah123" | Out-File -Append $env:GITHUB_OUTPUT
-          echo "acrName=Blah123" >> $GITHUB_ENV
-          echo "acrName=Blah123" | Out-File -Append $env:GITHUB_ENV
+          $outputs = "acrName=Blah123"
+          echo "Hard-coded outputs: $outputs"
+          echo $outputs | Out-File -Append $env:GITHUB_OUTPUT
     outputs: 
       acrName: ${{ steps.bicep-outputs.outputs.acrName }}
