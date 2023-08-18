@@ -29,6 +29,10 @@ on:
       vmImage:
         type: string
         default: 'ubuntu-latest'
+    outputs:
+      acrName:
+        description: 'Name of ACR'
+        value: ${{ jobs.deploy-bicep.outputs.acrName }}
 
 jobs:
   deploy-bicep:
