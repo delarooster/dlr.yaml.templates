@@ -1,13 +1,16 @@
 
 name: build node
+env:
+  NODEVERSION: '16.x'
+
 
 on:
   push:
-  workflow_dispatch:
+  workflow_call:
     inputs:
       NODEVERSION:
         type: string
-        default: '16.x'
+        default: $NODEVERSION
 
 
 jobs:
