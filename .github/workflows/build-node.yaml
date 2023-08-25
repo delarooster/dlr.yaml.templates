@@ -49,6 +49,7 @@ jobs:
       
       - name: npm test
         run: |
+          cd ${{ steps.defaults.outputs.workingDirectory }}
           npm test
       
       - name: display artifact
