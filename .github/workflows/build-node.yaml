@@ -1,7 +1,5 @@
 
 name: build node
-env:
-  NODEVERSION: '16.x'
 
 
 on:
@@ -11,6 +9,9 @@ on:
       NODEVERSION:
         type: string
         default: $NODEVERSION
+      workingDirectory:
+        type: string
+        default: node-example
 
 
 jobs:
@@ -21,14 +22,19 @@ jobs:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v2
 
+      # We can capture defaults using the below code. the := checks if the variable is null or empty and sets it if it is
+      # This entire step can be omitted if we are only using workflow_call or workflow_dispatch
       - name: capture default variables
         id: defaults
         run: |
           NODEVERSION=${{ inputs.nodeVersion }}
-          VALUE=${NODEVERSION:='16.x'}
-          echo "nodeVersion=${VALUE}" >> $GITHUB_OUTPUT
-          echo $VALUE
-          ls -lsa
+          TEMP_NODEVERSION=${NODEVERSION:='16.x'}
+
+          WORKINGDIRECTORY=${{ inputs.workingDirectory }}
+          TEMP_WORKINGDIRECTORY=${WORKINGDIRECTORY:='node-example'}
+
+          echo "nodeVersion=${TEMP_NODEVERSION}" >> $GITHUB_OUTPUT
+          echo "workingDirectory=${TEMP_WORKINGDIRECTORY}" >> $GITHUB_OUTPUT
 
       - name: Use Node.js ${{ steps.defaults.outputs.nodeVersion }}
         uses: actions/setup-node@v3
@@ -37,9 +43,12 @@ jobs:
       
       - name: npm install
         run: |
-          echo "the nodeVersion is ${{ steps.defaults.outputs.nodeVersion }}"
-          cd node-example
+          echo "the nodeVersion is ${{ steps.defaults.outputs.nodeVersion }} and the working directory is ${{ steps.defaults.outputs.workingDirectory }}"
+          cd ${{ steps.defaults.outputs.workingDirectory }}
           npm ci
+      
+      - name: npm test
+        run: |
           npm test
       
       - name: display artifact
