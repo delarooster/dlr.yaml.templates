@@ -108,11 +108,21 @@ jobs:
       #     else {
       #         Write-Host "BICEP outputs are null"
       #     }
-      - name: Hard-Coded Outputs
-        id: bicep-outputs
+      - name: Create Outputs
+        id: outputs
         run: |
-          $outputs = "acrName=Blah123"
-          echo "Hard-coded outputs: $outputs"
-          echo $outputs | Out-File -Append $env:GITHUB_OUTPUT
-    outputs: 
-      acrName: ${{ steps.bicep-outputs.outputs.acrName }}
+          echo "acrName=Blah123" | Out-File -Append $env:GITHUB_OUTPUT
+          mkdir bicep-outputs
+          Set-Content -Path "bicep-outputs/acrName" -Value Blah123
+      - uses: actions/upload-artifact@v3
+        with:
+          name: bicep-outputs
+          path: bicep-outputs/
+    #   - name: Hard-Coded Outputs
+    #     id: bicep-outputs
+    #     run: |
+    #       $outputs = "acrName=Blah123"
+    #       echo "Hard-coded outputs: $outputs"
+    #       echo $outputs | Out-File -Append $env:GITHUB_OUTPUT
+    # outputs: 
+    #   acrName: ${{ steps.bicep-outputs.outputs.acrName }}
