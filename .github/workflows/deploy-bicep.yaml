@@ -44,85 +44,60 @@ jobs:
       # Checkout the repo
       - uses: actions/checkout@v2
       # Login to Azure
-      # - name: Azure Login
-      #   uses: azure/login@v1
-      #   with:
-      #     # Credentials inherited from parent workflow
-      #     creds: ${{ secrets.AZURE_CREDENTIALS }}
+      - name: Azure Login
+        uses: azure/login@v1
+        with:
+          # Credentials inherited from parent workflow
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
 
-      # - name: Read YAML variables
-      #   uses: pietrobolcato/action-read-yaml@1.0.0
-      #   id: yaml-data
-      #   with:
-      #     config: ${{ inputs.variablesYamlPath }}
+      - name: Read YAML variables
+        uses: pietrobolcato/action-read-yaml@1.0.0
+        id: yaml-data
+        with:
+          config: ${{ inputs.variablesYamlPath }}
 
-      # - run: |
-      #     az account show
-      #     az group create --name ${{ inputs.resourceGroup }} --location ${{ inputs.resourceGroupLocation }}
+      - run: |
+          az account show
+          az group create --name ${{ inputs.resourceGroup }} --location ${{ inputs.resourceGroupLocation }}
 
-      # - name: Get current time
-      #   uses: josStorer/get-current-time@v2
-      #   id: current-time
-      #   with:
-      #     format: YYYYMMDD-HH
-
-      # - run: |
-      #     $inputValue = "${{ steps.current-time.outputs.time }}".Replace(":", "-")
-      #     $keyValuePair = "currentTime=$inputValue"
-      #     Set-Content -Path .env -Value $keyValuePair
-
-      # - name: Deploy Bicep Template
-      #   id: bicep-deploy
-      #   run: |
-      #     # $currentTime = (Get-Content -Path .env).Split("=")[1]
-
-      #     az --version
-      #     az deployment group create `
-      #       --resource-group ${{ inputs.resourceGroup }} `
-      #       --name azuredeploy-$GITHUB_RUN_ATTEMPT `
-      #       --template-file ${{ inputs.bicepTemplatePath }} `
-      #       --parameters `
-      #         clientAffix=${{ steps.yaml-data.outputs['clientAffix'] }} `
-      #         env=${{ steps.yaml-data.outputs['env'] }} `
-      #         projectAffix=${{ steps.yaml-data.outputs['projectAffix'] }} `
-      #         ${{ inputs.additionalBicepParameters }}
-      
-      # - name: 'Capture Bicep Outputs'
-      #   id: bicep-outputs
-      #   run: |
-      #     # $currentTime = (Get-Content -Path .env).Split("=")[1]
-      #     # Write-Host "Current time: $currentTime"
-      #     $out = az deployment group show -g ${{ inputs.resourceGroup }} -n "azuredeploy-$GITHUB_RUN_ATTEMPT" | convertfrom-json | foreach properties | foreach outputs
-      #     if($out -ne $null)
-      #     {
-      #         $provisionOutputs = [PSCustomObject]@{}
-      #         $out | Get-Member -MemberType NoteProperty | ForEach-Object {
-      #           $name = $_.name
-      #           $provisionOutputs | Add-Member -MemberType NoteProperty -Name $name -value $out.$name.value
-      #           Write-Host "BICEP output key/value -> $($name): $($out.$name.value)"
-      #           # Write-Host "$($name)=$($out.$name.value)" >> "$env:GITHUB_ENV"
-      #           # Add-Content -Path $env:GITHUB_ENV -Value "$($name)=$($out.$name.value)"
-      #           echo "$($name)=$($out.$name.value)" | Out-File -Append $env:GITHUB_OUTPUT
-      #         }
-      #     }
-      #     else {
-      #         Write-Host "BICEP outputs are null"
-      #     }
-      - name: Create Outputs
-        id: outputs
+      - name: Deploy Bicep Template
+        id: bicep-deploy
         run: |
-          echo "acrName=Blah123" | Out-File -Append $env:GITHUB_OUTPUT
+          az --version
+          az deployment group create `
+            --resource-group ${{ inputs.resourceGroup }} `
+            --name azuredeploy-$($env:GITHUB_RUN_ATTEMPT) `
+            --template-file ${{ inputs.bicepTemplatePath }} `
+            --parameters `
+              clientAffix=${{ steps.yaml-data.outputs['clientAffix'] }} `
+              env=${{ steps.yaml-data.outputs['env'] }} `
+              projectAffix=${{ steps.yaml-data.outputs['projectAffix'] }} `
+              ${{ inputs.additionalBicepParameters }}
+      
+      - name: 'Capture Bicep Outputs'
+        id: bicep-outputs
+        run: |
+          $out = az deployment group show -g ${{ inputs.resourceGroup }} -n "azuredeploy-$($env:GITHUB_RUN_ATTEMPT)" | convertfrom-json | foreach properties | foreach outputs
           mkdir bicep-outputs
-          Set-Content -Path "bicep-outputs/acrName" -Value Blah123
+          if($out -ne $null)
+          {
+              $provisionOutputs = [PSCustomObject]@{}
+              $out | Get-Member -MemberType NoteProperty | ForEach-Object {
+                $name = $_.name
+                $provisionOutputs | Add-Member -MemberType NoteProperty -Name $name -value $out.$name.value
+                Write-Host "BICEP output key/value -> $($name): $($out.$name.value)"
+                Set-Content -Path "bicep-outputs/$($name) -Value $($out.$name.value)"
+              }
+          }
+          else {
+              Write-Host "BICEP outputs are null"
+          }
+      # - name: Create Outputs
+      #   id: outputs
+      #   run: |
+      #     mkdir bicep-outputs
+      #     Set-Content -Path "bicep-outputs/acrName" -Value Blah123
       - uses: actions/upload-artifact@v3
         with:
           name: bicep-outputs
           path: bicep-outputs/
-    #   - name: Hard-Coded Outputs
-    #     id: bicep-outputs
-    #     run: |
-    #       $outputs = "acrName=Blah123"
-    #       echo "Hard-coded outputs: $outputs"
-    #       echo $outputs | Out-File -Append $env:GITHUB_OUTPUT
-    # outputs: 
-    #   acrName: ${{ steps.bicep-outputs.outputs.acrName }}
