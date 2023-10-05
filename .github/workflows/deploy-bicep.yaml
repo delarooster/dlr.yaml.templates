@@ -92,11 +92,7 @@ jobs:
           else {
               Write-Host "BICEP outputs are null"
           }
-      # - name: Create Outputs
-      #   id: outputs
-      #   run: |
-      #     mkdir bicep-outputs
-      #     Set-Content -Path "bicep-outputs/acrName" -Value Blah123
+          
       - uses: actions/upload-artifact@v3
         with:
           name: bicep-outputs

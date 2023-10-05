@@ -1,0 +1,74 @@
+name: Build Terraform
+
+on:
+  workflow_dispatch:
+  workflow_call:
+    inputs:
+      workingDirectory:
+        description: "The path to the intended workspace, e.g. main.tf"
+        default: env/
+        type: string
+      additionalTerraformParameters:
+        default: ""
+        type: string
+      resourceGroup:
+        type: string
+        required: true
+      resourceGroupLocation:
+        type: string
+        default: "eastus"
+      targetEnvironment:
+        type: string
+        default: "dv"
+      terraformVersion:
+        type: string
+        default: 1.5.7
+      variablesYamlPath:
+        type: string
+        default: "./pipelines/variables.yaml"
+      vmImage:
+        type: string
+        default: "ubuntu-latest"
+
+jobs:
+  build-terraform:
+    name: "Init and Plan Terraform"
+    runs-on: ${{ inputs.vmImage }}
+    defaults:
+      run:
+        shell: pwsh
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v1
+        with:
+          terraform_version: ${{ inputs.terraformVersion }}
+
+      # Initialize a new or existing Terraform working directory by creating initial files, loading any remote state, downloading modules, etc.
+      - name: Terraform Init
+        id: init
+        env:
+          ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
+          ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
+          ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
+          ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
+          RESOURCE_GROUP: ${{ secrets.RESOURCE_GROUP }}
+          STORAGE_ACCOUNT: ${{ secrets.STORAGE_ACCOUNT }}
+          CONTAINER_NAME: ${{ secrets.CONTAINER_NAME }}
+        run: terraform init -backend-config="storage_account_name=$env:STORAGE_ACCOUNT" -backend-config="container_name=$env:CONTAINER_NAME" -backend-config="resource_group_name=$env:RESOURCE_GROUP"
+
+      - name: Terraform Plan
+        id: plan
+        env:
+          ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
+          ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
+          ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
+          ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
+        run: terraform plan -out=${{ inputs.env }}.plan -var-file=${{ inputs.targetEnvironment }}.tfvars
+
+      - uses: actions/upload-artifact@v3
+        with:
+          name: terraform-plans
+          path: plans/

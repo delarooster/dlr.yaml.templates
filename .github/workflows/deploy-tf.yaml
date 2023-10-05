@@ -1,0 +1,54 @@
+name: "Terraform Deploy"
+
+on:
+  workflow_dispatch:
+  workflow_call:
+    inputs:
+      workingDirectory:
+        description: "The path to the intended workspace, e.g. main.tf"
+        default: env/
+        type: string
+      additionalTerraformParameters:
+        default: ""
+        type: string
+      targetEnvironment:
+        default: Dv
+        type: string
+      resourceGroup:
+        type: string
+        required: true
+      resourceGroupLocation:
+        type: string
+        default: "eastus"
+      terraformVersion:
+        type: string
+        default: 1.5.7
+      variablesYamlPath:
+        type: string
+        default: "./pipelines/variables.yaml"
+      vmImage:
+        type: string
+        default: "ubuntu-latest"
+
+jobs:
+  deploy-terraform:
+    name: "Deploy"
+    runs-on: ${{ inputs.vmImage}}
+    defaults:
+      run:
+        shell: pwsh
+        working-directory: ${{ inputs.workingDirectory }}
+
+    steps:
+      - uses: actions/download-artifact@v3
+        with:
+          name: terraform-plans
+          path: terraform-plans
+
+      - name: Terraform Apply
+        env:
+          ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
+          ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
+          ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
+          ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
+        run: terraform apply -auto-approve
