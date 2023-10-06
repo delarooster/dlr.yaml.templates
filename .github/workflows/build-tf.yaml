@@ -102,8 +102,7 @@ jobs:
 
       - run: |
           ls -la
-          # Check if 'plans/' directory exists; if not, create it
-          [ -d "plans/" ] || mkdir plans/
+          mkdir plans/
 
           # Loop through all .tfplan files and move them to the 'plans/' directory
           for file in *.tfplan; do
