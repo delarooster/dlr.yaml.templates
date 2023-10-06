@@ -107,12 +107,11 @@ jobs:
 
           # Loop through all .tfplan files and move them to the 'plans/' directory
           for file in *.tfplan; do
-              # Only attempt to move if a .tfplan file actually exists
-              if [ -f "$file" ]; then
-                  mv "$file" plans/
-              fi
+            mv "$file" plans/
           done
 
+          cd plans/
+          ls -la
           echo "All .tfplan files have been moved to the plans/ directory."
         name: Stage Plans Directory
 
