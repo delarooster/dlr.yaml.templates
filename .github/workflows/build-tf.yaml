@@ -100,21 +100,7 @@ jobs:
           fi
         working-directory: ${{ inputs.workingDirectory }}
 
-      - run: |
-          ls -la
-          mkdir plans/
-
-          # Loop through all .tfplan files and move them to the 'plans/' directory
-          for file in *.tfplan; do
-            mv "$file" plans/
-          done
-
-          cd plans/
-          ls -la
-          echo "All .tfplan files have been moved to the plans/ directory."
-        name: Stage Plans Directory
-
       - uses: actions/upload-artifact@v3
         with:
           name: terraform-plans
-          path: plans/
+          path: *.tfplan
