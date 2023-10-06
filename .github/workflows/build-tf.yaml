@@ -83,8 +83,8 @@ jobs:
         run: terraform fmt -recursive -diff -check
 
       - run: |
-          ls -la
           mkdir plans/
+          ls -la
         name: Create Plans Directory
 
       # Generates an execution plan for Terraform
@@ -93,7 +93,7 @@ jobs:
         id: tf-plan
         run: |
           export exitcode=0
-          terraform plan -var-file="variables/${{ inputs.targetEnvironment }}.tfvars" -detailed-exitcode -out plans/${{ inputs.targetEnvironment }}.tfplan || export exitcode=$?
+          terraform plan -var-file="variables/${{ inputs.targetEnvironment }}.tfvars" -detailed-exitcode -out ${{ inputs.targetEnvironment }}.tfplan || export exitcode=$?
 
           echo "exitcode=$exitcode" >> $GITHUB_OUTPUT
 
@@ -104,6 +104,10 @@ jobs:
             exit 0
           fi
         working-directory: ${{ inputs.workingDirectory }}
+
+      - run: |
+          ls -la
+        name: Tree
 
       - uses: actions/upload-artifact@v3
         with:
