@@ -6,7 +6,7 @@ on:
     inputs:
       workingDirectory:
         description: "The path to the intended workspace, e.g. main.tf"
-        default: env/
+        default: ./env
         type: string
       additionalTerraformParameters:
         default: ""
@@ -30,43 +30,77 @@ on:
         type: string
         default: "ubuntu-latest"
 
+#Special permissions required for OIDC authentication
+permissions:
+  id-token: write
+  contents: read
+  pull-requests: write
+
+#These environment variables are used by the terraform azure provider to setup OIDD authenticate.
+env:
+  ARM_CLIENT_ID: "${{ secrets.ARM_CLIENT_ID }}"
+  ARM_CLIENT_SECRET: "${{ secrets.ARM_CLIENT_SECRET }}"
+  ARM_SUBSCRIPTION_ID: "${{ secrets.ARM_SUBSCRIPTION_ID }}"
+  ARM_TENANT_ID: "${{ secrets.ARM_TENANT_ID }}"
+
 jobs:
   build-terraform:
     name: "Init and Plan Terraform"
     runs-on: ${{ inputs.vmImage }}
-    defaults:
-      run:
-        shell: pwsh
+    env:
+      #this is needed since we are running terraform with read-only permissions
+      ARM_SKIP_PROVIDER_REGISTRATION: true
     steps:
       - name: Checkout
         uses: actions/checkout@v2
 
       - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v1
+        uses: hashicorp/setup-terraform@v2
         with:
-          terraform_version: ${{ inputs.terraformVersion }}
+          terraform_version: 1.5.7
+          terraform_wrapper: false
 
+      # TODO fix hardcoded state file key name below
       # Initialize a new or existing Terraform working directory by creating initial files, loading any remote state, downloading modules, etc.
       - name: Terraform Init
         id: init
         env:
-          ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
-          ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
-          ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
-          ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
+          ARM_CLIENT_ID: "${{ secrets.ARM_CLIENT_ID }}"
+          ARM_CLIENT_SECRET: "${{ secrets.ARM_CLIENT_SECRET }}"
+          ARM_SUBSCRIPTION_ID: "${{ secrets.ARM_SUBSCRIPTION_ID }}"
+          ARM_TENANT_ID: "${{ secrets.ARM_TENANT_ID }}"
+          CONTAINER_NAME: ${{ secrets.CONTAINER_NAME }}
           RESOURCE_GROUP: ${{ secrets.RESOURCE_GROUP }}
           STORAGE_ACCOUNT: ${{ secrets.STORAGE_ACCOUNT }}
-          CONTAINER_NAME: ${{ secrets.CONTAINER_NAME }}
-        run: terraform init -backend-config="storage_account_name=$STORAGE_ACCOUNT" -backend-config="container_name=$CONTAINER_NAME" -backend-config="resource_group_name=$RESOURCE_GROUP"
+        run: |
+          terraform init -backend-config="resource_group_name=$RESOURCE_GROUP" \
+            -backend-config="storage_account_name=$STORAGE_ACCOUNT" \
+            -backend-config="container_name=$CONTAINER_NAME" \
+            -backend-config="key=dvgithubstatefiles"
+        working-directory: ${{ inputs.workingDirectory }}
 
+      - name: Terraform Format
+        run: terraform fmt -recursive -diff -check
+
+      - run: ls -la
+
+      # Generates an execution plan for Terraform
+      # An exit code of 0 indicated no changes, 1 a terraform failure, 2 there are pending changes.
       - name: Terraform Plan
-        id: plan
-        env:
-          ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
-          ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
-          ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
-          ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
-        run: terraform plan -out="plans/${{ inputs.targetEnvironment }}.tfplan" -var-file="env/variables/${{ inputs.targetEnvironment }}.tfvars"
+        id: tf-plan
+        run: |
+          export exitcode=0
+          terraform plan -var-file="variables/${{ inputs.targetEnvironment }}.tfvars" -detailed-exitcode -out plans/${{ inputs.targetEnvironment }}.tfplan || export exitcode=$?
+
+          echo "exitcode=$exitcode" >> $GITHUB_OUTPUT
+
+          if [ $exitcode -eq 1 ]; then
+            echo Terraform Plan Failed!
+            exit 1
+          else 
+            exit 0
+          fi
+        working-directory: ${{ inputs.workingDirectory }}
 
       - uses: actions/upload-artifact@v3
         with:
