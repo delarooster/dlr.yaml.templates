@@ -87,17 +87,7 @@ jobs:
       - name: Terraform Plan
         id: tf-plan
         run: |
-          export exitcode=0
-          terraform plan -var-file="variables/${{ inputs.targetEnvironment }}.tfvars" -detailed-exitcode -out="${{ inputs.targetEnvironment }}.tfplan" || export exitcode=$?
-
-          echo "exitcode=$exitcode" >> $GITHUB_OUTPUT
-
-          if [ $exitcode -eq 1 ]; then
-            echo Terraform Plan Failed!
-            exit 1
-          else 
-            exit 0
-          fi
+          terraform plan -var-file="variables/${{ inputs.targetEnvironment }}.tfvars" -out="${{ inputs.targetEnvironment }}.tfplan"
         working-directory: ${{ inputs.workingDirectory }}
 
       - uses: actions/upload-artifact@v3
