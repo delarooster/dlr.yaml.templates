@@ -82,7 +82,10 @@ jobs:
       - name: Terraform Format
         run: terraform fmt -recursive -diff -check
 
-      - run: ls -la
+      - run: |
+          ls -la
+          mkdir plans/
+        name: Create Plans Directory
 
       # Generates an execution plan for Terraform
       # An exit code of 0 indicated no changes, 1 a terraform failure, 2 there are pending changes.
