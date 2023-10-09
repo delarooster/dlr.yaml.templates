@@ -57,7 +57,7 @@ jobs:
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v2
         with:
-          terraform_version: 1.5.7
+          terraform_version: ${{ inputs.terraformVersion }}
           terraform_wrapper: false
 
       # TODO fix hardcoded state file key name below
@@ -87,7 +87,7 @@ jobs:
       - name: Terraform Plan
         id: tf-plan
         run: |
-          terraform plan -var-file="variables/${{ inputs.targetEnvironment }}.tfvars" -out="${{ inputs.targetEnvironment }}.tfplan"
+          terraform plan -var-file="variables/${{ inputs.targetEnvironment }}.tfvars" -out=${{ inputs.targetEnvironment }}.tfplan
         working-directory: ${{ inputs.workingDirectory }}
 
       - uses: actions/upload-artifact@v3
