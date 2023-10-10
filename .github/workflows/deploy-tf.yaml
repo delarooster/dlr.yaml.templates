@@ -25,6 +25,10 @@ on:
       vmImage:
         type: string
         default: "ubuntu-latest"
+      workingDirectory:
+        description: "The path to the intended workspace, e.g. main.tf"
+        default: ./env
+        type: string
 
 #Special permissions required for OIDC authentication
 permissions:
@@ -68,6 +72,7 @@ jobs:
             -backend-config="storage_account_name=$STORAGE_ACCOUNT" \
             -backend-config="container_name=$CONTAINER_NAME" \
             -backend-config="key=dvgithubstatefiles"
+        working-directory: ${{ inputs.workingDirectory }}
 
       - run: |
           echo "dir"
