@@ -77,10 +77,6 @@ jobs:
       - run: |
           echo "dir"
           ls -la
-
-          echo "terraform plan dir"
-          cd terraform-plans 
-          ls -la
         name: Debugging Logs
 
       - name: Terraform Apply
