@@ -54,7 +54,7 @@ jobs:
       - uses: actions/download-artifact@v3
         with:
           name: terraform-plans
-          path: terraform-plans
+          path: ${{ inputs.workingDirectory }}
 
       # TODO fix hardcoded state file key name below
       - name: Terraform Init
@@ -89,5 +89,5 @@ jobs:
           ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
           ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
           ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
-        run: terraform apply -auto-approve terraform-plans/${{ inputs.targetEnvironment }}.tfplan
+        run: terraform apply -auto-approve ${{ inputs.targetEnvironment }}.tfplan
         working-directory: ${{ inputs.workingDirectory }}
