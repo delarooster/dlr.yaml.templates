@@ -65,7 +65,13 @@ jobs:
       #       -backend-config="container_name=$CONTAINER_NAME" \
       #       -backend-config="key=dvgithubstatefiles"
 
-      - run: ls -la
+      - run: |
+          echo "dir"
+          ls -la
+
+          echo "terraform plan dir"
+          cd terraform-plans 
+          ls -la
 
       - name: Terraform Apply
         env:
