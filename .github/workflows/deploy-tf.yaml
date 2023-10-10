@@ -73,6 +73,10 @@ jobs:
           cd terraform-plans 
           ls -la
 
+          echo "env"
+          cd env
+          ls -la
+
       - name: Terraform Apply
         env:
           ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
