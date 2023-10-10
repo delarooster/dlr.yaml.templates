@@ -90,7 +90,12 @@ jobs:
           terraform plan -var-file="variables/${{ inputs.targetEnvironment }}.tfvars" -out=${{ inputs.targetEnvironment }}.tfplan
         working-directory: ${{ inputs.workingDirectory }}
 
+      # - name: Terraform Show
+      #   id: tf-show
+      #   run: |
+      #     terraform show -no-color ${{ inputs.targetEnvironment }}.tfplan > ${{ inputs.targetEnvironment }}.txt
+
       - uses: actions/upload-artifact@v3
         with:
           name: terraform-plans
-          path: ./**/*.tfplan
+          path: ./env/*.tfplan

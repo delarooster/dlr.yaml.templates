@@ -5,11 +5,11 @@ on:
   workflow_call:
     inputs:
       bicepTemplatePath:
-        description: 'The path to the top-level bicep template, e.g. main.bicep'
+        description: "The path to the top-level bicep template, e.g. main.bicep"
         default: env/main.bicep
         type: string
       additionalBicepParameters:
-        default: ''
+        default: ""
         type: string
       clientAffix:
         required: true
@@ -22,16 +22,16 @@ on:
         required: true
       resourceGroupLocation:
         type: string
-        default: 'eastus'
+        default: "eastus"
       variablesYamlPath:
         type: string
-        default: './pipelines/variables.yaml'
+        default: "./pipelines/variables.yaml"
       vmImage:
         type: string
-        default: 'ubuntu-latest'
+        default: "ubuntu-latest"
     outputs:
       acrName:
-        description: 'Name of ACR'
+        description: "Name of ACR"
         value: ${{ jobs.deploy-bicep.outputs.acrName }}
 
 jobs:
@@ -73,8 +73,8 @@ jobs:
               env=${{ steps.yaml-data.outputs['env'] }} `
               projectAffix=${{ steps.yaml-data.outputs['projectAffix'] }} `
               ${{ inputs.additionalBicepParameters }}
-      
-      - name: 'Capture Bicep Outputs'
+
+      - name: "Capture Bicep Outputs"
         id: bicep-outputs
         run: |
           $out = az deployment group show -g ${{ inputs.resourceGroup }} -n "azuredeploy-$($env:GITHUB_RUN_ATTEMPT)" | convertfrom-json | foreach properties | foreach outputs
@@ -92,7 +92,7 @@ jobs:
           else {
               Write-Host "BICEP outputs are null"
           }
-          
+
       - uses: actions/upload-artifact@v3
         with:
           name: bicep-outputs
