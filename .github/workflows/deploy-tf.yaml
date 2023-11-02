@@ -70,13 +70,14 @@ jobs:
           ARM_SUBSCRIPTION_ID: "${{ secrets.ARM_SUBSCRIPTION_ID }}"
           ARM_TENANT_ID: "${{ secrets.ARM_TENANT_ID }}"
           CONTAINER_NAME: ${{ secrets.CONTAINER_NAME }}
+          ENVIRONMENT: ${{ inputs.targetEnvironment }}
           RESOURCE_GROUP: ${{ inputs.resourceGroup }}
           STORAGE_ACCOUNT: ${{ secrets.STORAGE_ACCOUNT }}
         run: |
           terraform init -backend-config="resource_group_name=$RESOURCE_GROUP" \
             -backend-config="storage_account_name=$STORAGE_ACCOUNT" \
             -backend-config="container_name=$CONTAINER_NAME" \
-            -backend-config="key=dvgithubstatefiles"
+            -backend-config="key=${ENVIRONMENT}githubstatefiles"
         working-directory: ${{ inputs.workingDirectory }}
 
       - run: |
