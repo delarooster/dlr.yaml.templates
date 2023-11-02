@@ -71,7 +71,7 @@ jobs:
           ARM_TENANT_ID: "${{ secrets.ARM_TENANT_ID }}"
           CONTAINER_NAME: ${{ secrets.CONTAINER_NAME }}
           ENVIRONMENT: ${{ inputs.targetEnvironment }}
-          RESOURCE_GROUP: ${{ inputs.resourceGroup }}
+          RESOURCE_GROUP: ${{ secrets.RESOURCE_GROUP }}
           STORAGE_ACCOUNT: ${{ secrets.STORAGE_ACCOUNT }}
         run: |
           terraform init -backend-config="resource_group_name=$RESOURCE_GROUP" \
