@@ -69,10 +69,10 @@ jobs:
           ARM_CLIENT_SECRET: "${{ secrets.ARM_CLIENT_SECRET }}"
           ARM_SUBSCRIPTION_ID: "${{ secrets.ARM_SUBSCRIPTION_ID }}"
           ARM_TENANT_ID: "${{ secrets.ARM_TENANT_ID }}"
-          CONTAINER_NAME: ${{ secrets.CONTAINER_NAME }}
+          CONTAINER_NAME: ${{ secrets.STATE_FILE_CONTAINER_NAME }}
           ENVIRONMENT: ${{ inputs.targetEnvironment }}
-          RESOURCE_GROUP: ${{ secrets.RESOURCE_GROUP }}
-          STORAGE_ACCOUNT: ${{ secrets.STORAGE_ACCOUNT }}
+          RESOURCE_GROUP: ${{ secrets.STATE_FILE_RESOURCE_GROUP }}
+          STORAGE_ACCOUNT: ${{ secrets.STATE_FILE_STORAGE_ACCOUNT }}
         run: |
           terraform init -backend-config="resource_group_name=$RESOURCE_GROUP" \
             -backend-config="storage_account_name=$STORAGE_ACCOUNT" \
