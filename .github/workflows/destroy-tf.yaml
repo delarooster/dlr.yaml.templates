@@ -1,0 +1,90 @@
+name: Destroy Terraform
+
+on:
+  workflow_dispatch:
+  workflow_call:
+    inputs:
+      additionalTerraformParameters:
+        default: ""
+        type: string
+      resourceGroup:
+        type: string
+        required: true
+      resourceGroupLocation:
+        type: string
+        default: "eastus"
+      targetEnvironment:
+        default: Dv
+        type: string
+      terraformVersion:
+        type: string
+        default: 1.5.7
+      variablesYamlPath:
+        type: string
+        default: "./pipelines/variables.yaml"
+      vmImage:
+        type: string
+        default: "ubuntu-latest"
+      workingDirectory:
+        description: "The path to the intended workspace, e.g. main.tf"
+        default: ./env
+        type: string
+
+#Special permissions required for OIDC authentication
+permissions:
+  id-token: write
+  contents: read
+  pull-requests: write
+
+#These environment variables are used by the terraform azure provider to setup OIDD authenticate.
+env:
+  ARM_CLIENT_ID: "${{ secrets.ARM_CLIENT_ID }}"
+  ARM_CLIENT_SECRET: "${{ secrets.ARM_CLIENT_SECRET }}"
+  ARM_SUBSCRIPTION_ID: "${{ secrets.ARM_SUBSCRIPTION_ID }}"
+  ARM_TENANT_ID: "${{ secrets.ARM_TENANT_ID }}"
+
+jobs:
+  destroy-terraform:
+    name: "Destroy Terraform"
+    runs-on: ${{ inputs.vmImage}}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v2
+        with:
+          terraform_version: ${{ inputs.terraformVersion }}
+
+      # TODO fix hardcoded state file key name below
+      - name: Terraform Init
+        id: init
+        env:
+          ARM_CLIENT_ID: "${{ secrets.ARM_CLIENT_ID }}"
+          ARM_CLIENT_SECRET: "${{ secrets.ARM_CLIENT_SECRET }}"
+          ARM_SUBSCRIPTION_ID: "${{ secrets.ARM_SUBSCRIPTION_ID }}"
+          ARM_TENANT_ID: "${{ secrets.ARM_TENANT_ID }}"
+          STATE_FILE_CONTAINER_NAME: ${{ secrets.STATE_FILE_CONTAINER_NAME }}
+          ENVIRONMENT: ${{ inputs.targetEnvironment }}
+          STATE_FILE_RESOURCE_GROUP: ${{ secrets.STATE_FILE_RESOURCE_GROUP }}
+          STATE_FILE_STORAGE_ACCOUNT: ${{ secrets.STATE_FILE_STORAGE_ACCOUNT }}
+        run: |
+          terraform init -backend-config="resource_group_name=$STATE_FILE_RESOURCE_GROUP" \
+            -backend-config="storage_account_name=$STATE_FILE_STORAGE_ACCOUNT" \
+            -backend-config="container_name=$STATE_FILE_CONTAINER_NAME" \
+            -backend-config="key=${ENVIRONMENT}githubstatefiles"
+        working-directory: ${{ inputs.workingDirectory }}
+
+      - run: |
+          echo "dir"
+          ls -la
+        name: Debugging Logs
+
+      - name: Terraform Destroy
+        env:
+          ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
+          ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
+          ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
+          ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
+        run: terraform destroy -auto-approve -var-file="variables/${{ inputs.targetEnvironment }}.tfvars"
+        working-directory: ${{ inputs.workingDirectory }}
